@@ -6,6 +6,7 @@ exec > >(tee reports/check.log) 2>&1
 trap 'code=$?; echo "check exit=$code"' EXIT
 export CARGO_BUILD_JOBS="${CARGO_BUILD_JOBS:-2}"
 set -x
+tools/prepare-contracts
 rustc --version
 [[ "$(rustc --version)" == 'rustc 1.93.0 '* ]]
 cargo --version

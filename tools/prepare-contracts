@@ -3,10 +3,10 @@ import pathlib, subprocess, sys, tomllib
 root = pathlib.Path(__file__).resolve().parents[1]
 pin = tomllib.loads((root / "contracts-pin.toml").read_text())
 source = sys.argv[1] if len(sys.argv) == 2 else pin["url"]
-if not source:
-    sys.exit("remote unavailable: pass the local contracts Git repository as one argument")
 dest = root.parent / "datomato-contracts"
 if not dest.exists():
+    if not source:
+        sys.exit("remote unavailable: pass the local contracts Git repository as one argument")
     subprocess.run(["git", "clone", "--no-local", "--no-checkout", source, str(dest)], check=True)
     subprocess.run(["git", "-C", str(dest), "checkout", "--detach", pin["rev"]], check=True)
 actual = subprocess.check_output(["git", "-C", str(dest), "rev-parse", "HEAD"], text=True).strip()

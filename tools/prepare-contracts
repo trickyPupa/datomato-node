@@ -1,16 +1,25 @@
-#!/usr/bin/env python3
-import pathlib, subprocess, sys, tomllib
-root = pathlib.Path(__file__).resolve().parents[1]
-pin = tomllib.loads((root / "contracts-pin.toml").read_text())
-source = sys.argv[1] if len(sys.argv) == 2 else pin["url"]
-dest = root.parent / "datomato-contracts"
-if not dest.exists():
-    if not source:
-        sys.exit("remote unavailable: pass the local contracts Git repository as one argument")
-    subprocess.run(["git", "clone", "--no-local", "--no-checkout", source, str(dest)], check=True)
-    subprocess.run(["git", "-C", str(dest), "checkout", "--detach", pin["rev"]], check=True)
-actual = subprocess.check_output(["git", "-C", str(dest), "rev-parse", "HEAD"], text=True).strip()
-dirty = subprocess.check_output(["git", "-C", str(dest), "status", "--porcelain"], text=True)
-if actual != pin["rev"] or dirty:
-    sys.exit("contracts checkout differs from pin or is dirty; no files were overwritten")
-print("TEMPORARY local contracts:", actual)
+#!/usr/bin/env bash
+set -euo pipefail
+root=$(cd "$(dirname "$0")/.." && pwd)
+if (( $# > 1 )); then
+    echo 'usage: tools/prepare-contracts [SOURCE]' >&2
+    exit 2
+fi
+rev=$(sed -n 's/^rev = "\([0-9a-f]*\)"$/\1/p' "$root/contracts-pin.toml")
+[[ "$rev" =~ ^[0-9a-f]{40}$ ]]
+source=${1:-$(sed -n 's/^url = "\(.*\)"$/\1/p' "$root/contracts-pin.toml")}
+dest="$root/../datomato-contracts"
+if [[ ! -e "$dest" ]]; then
+    if [[ -z "$source" ]]; then
+        echo 'remote unavailable: pass the local contracts Git repository as one argument' >&2
+        exit 1
+    fi
+    git clone --no-local --no-checkout -- "$source" "$dest"
+    git -C "$dest" checkout --detach "$rev"
+fi
+actual=$(git -C "$dest" rev-parse HEAD)
+if [[ "$actual" != "$rev" || -n "$(git -C "$dest" status --porcelain)" ]]; then
+    echo 'contracts checkout differs from pin or is dirty; no files were overwritten' >&2
+    exit 1
+fi
+echo "TEMPORARY local contracts: $actual"

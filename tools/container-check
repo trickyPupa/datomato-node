@@ -1,0 +1,11 @@
+#!/usr/bin/env bash
+set -euo pipefail
+root=$(cd "$(dirname "$0")/.." && pwd)
+docker build --pull -t datomato-build:rust-1.93.0 "$root"
+# Mount the product and its temporary contracts checkout using relative layout.
+args=(-v "$root:/workspace/product:Z")
+if [[ -f "$root/contracts-pin.toml" ]]; then
+    args+=(-v "$root/../datomato-contracts:/workspace/datomato-contracts:ro,Z")
+fi
+docker run --rm --user "$(id -u):$(id -g)" -e CARGO_HOME=/tmp/cargo \
+    "${args[@]}" -w /workspace/product datomato-build:rust-1.93.0 tools/check

@@ -1,0 +1,6 @@
+/target/
+/reports/
+/.context/
+/.integration/
+__pycache__/
+*.pyc

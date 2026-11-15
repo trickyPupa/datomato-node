@@ -1,0 +1,12 @@
+#!/usr/bin/env python3
+import pathlib, re, subprocess, sys
+if len(sys.argv) != 3 or not re.fullmatch(r"[0-9a-f]{40}", sys.argv[2]):
+    sys.exit("usage: tools/get-context SYSTEM_SOURCE FULL_SHA")
+root = pathlib.Path(__file__).resolve().parents[1]
+dest = root / ".context/system"
+if dest.exists():
+    sys.exit("context already exists; use a new worktree for another context revision")
+dest.parent.mkdir(exist_ok=True)
+subprocess.run(["git", "clone", "--no-local", "--no-checkout", sys.argv[1], str(dest)], check=True)
+subprocess.run(["git", "-C", str(dest), "checkout", "--detach", sys.argv[2]], check=True)
+print("Context:", dest, "revision:", sys.argv[2])

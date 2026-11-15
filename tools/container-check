@@ -1,6 +1,8 @@
 #!/usr/bin/env bash
 set -euo pipefail
 root=$(cd "$(dirname "$0")/.." && pwd)
+mkdir -p "$root/reports"
+exec > >(tee "$root/reports/container.log") 2>&1
 docker build --pull -t datomato-build:rust-1.93.0 "$root"
 # Mount the product and its temporary contracts checkout using relative layout.
 args=(-v "$root:/workspace/product:Z")

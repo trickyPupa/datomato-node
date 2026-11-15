@@ -43,3 +43,11 @@ Cargo.toml использует относительный path `../datomato-con
 Читайте docs/spec/core-spec.md, docs/plans/technical-plan-v0.1.md,
 docs/decisions/design-decisions-v0.1.md и docs/architecture.md этой копии.
 Соседний checkout system не подразумевается и для сборки не нужен.
+
+## Установленный toolchain на текущей машине
+
+Здесь Rust 1.93.0 установлен под rustup-именем `stable`, а не `1.93.0`.
+До установки именованного toolchain можно выполнить `RUSTUP_TOOLCHAIN=stable tools/check`:
+скрипт дополнительно проверяет точную версию rustc 1.93.0 и отвергает другую.
+Для сквозного прогона используется такое же явное окружение. Это локальный обход
+отсутствия сети для rustup, а не замена закреплённого toolchain на плавающий stable в CI.

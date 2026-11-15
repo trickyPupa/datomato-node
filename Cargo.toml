@@ -5,7 +5,7 @@ members = ["crates/node-core", "crates/node-daemon"]
 [workspace.package]
 version = "0.1.0"
 edition = "2024"
-rust-version = "1.93"
+rust-version = "1.100"
 publish = false
 
 [workspace.dependencies]
